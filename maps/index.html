@@ -1,0 +1,314 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <title>Bassin de la Seine</title>
+    <meta charset="utf-8" />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet'/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>   
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link href="https://api.mapbox.com/mapbox-assembly/v0.23.2/assembly.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+  <style>
+    body {
+    margin: 0;
+    padding: 0;
+    max-width: 100vw; 
+    overflow: hidden;
+    max-height:100vh; 
+    }
+
+    #map {
+    width: 100vw; 
+    height:100vh; 
+    margin: auto;  
+    border-width:2px;
+    border-style:outset;
+    border-color:black;  
+}
+
+    ul {
+        margin: 20px;
+    }
+    ul {
+        margin: 10px; left:10px;
+    }
+
+    .input-color {
+        position: relative;
+    }
+
+    .input-color input {
+        padding-left: 60px; 
+        border-style: dotted;
+        border-color: white;     
+        width: 300px;
+    }
+
+    .input-color .color-box {
+        width: 40px;
+        height: 22px;
+        display: inline-block;
+        position: absolute;
+        left: 10px;
+        top: 5px;
+    }
+
+     .map-overlay {
+        z-index: 1;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.8);
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+    }
+
+/*Pop up on hover*/
+    .map-overlay-3 {
+        position: absolute;
+        height: 150px;
+        width: 350px;
+        background: rgba(255, 255, 255, 0.8);
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+        opacity: 0.8;
+        z-index: 1;
+        padding: 10px;
+        top: 10px;
+        left: calc(353px + 10px + 10px);
+        }
+
+
+/*Fenêtre de légende */
+
+    .map-overlay-2 {
+        z-index: 1;
+        overflow:scroll;
+        font: 10px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        position: absolute;
+        width: 353px;
+        top: 20px;
+        left: 10px;
+        padding: 1px;
+        background-color: #FFFFFF;
+        color: #000000;
+        height: calc(100vh - 20px);
+        opacity: 0.9;
+        margin-top: 10px;
+
+    }
+
+
+/*Classes des MAPS*/
+
+    .map-overlay-inner .categoryLabel {
+        display: block;
+        color: #FFFFFF;
+        background-color: #4d4d4d;
+        font-weight: bold;
+        font-size: 21px;
+        margin: 30 30 3px;
+    }
+
+    #features {
+        z-index: 1;
+        top: 0;
+        padding: 10px;
+        height: 320px;
+        margin-top: 10px;
+        width: 250px;
+        background-color: #FFFFFF;
+    }
+
+
+       
+    #remover {              
+        z-index: 1;
+        margin: 0 auto;
+        background-color: #fb5b3f;
+        color: #fff;
+        font-weight: bold;
+        padding: 0.5em;
+        cursor: pointer;
+        position: absolute;
+        left: 60%;
+        top: 9em;
+    }
+
+    #remover:hover {
+        background-color: salmon;
+    }
+
+/*Menu de configuration couche*/
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 50px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+}
+ 
+    #menu a {
+    font-size: 13px;
+    color: #404040;
+    display: block;
+    margin: 0;
+    padding: 0;
+    padding: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-align: center;
+    }
+     
+    #menu a:last-child {
+    border: none;
+    }
+     
+    #menu a:hover {
+    background-color: #f8f8f8;
+    color: #404040;
+    }
+     
+    #menu a.active {
+    background-color: #6d6d6d;
+    color: #ffffff;
+    }
+     
+    #menu a.active:hover {
+    background: #27699f;
+    }
+
+/*Texte cluster légende*/
+    .line-container {
+        display:flex;
+        align-items:center;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+        width: 300px;
+        color: rgba(0,0,0,.75);
+        font-size: 15px;
+        line-height: 24px;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: 400;
+    }
+
+/*Symboles cluster légende*/
+    .badge {
+        margin-right: 12px;
+        width : 8px;
+        height: 8px;
+        background-image: url('https://image.flaticon.com/icons/svg/33/33622.svg');
+        background-size: cover;
+    }
+
+
+
+  </style>
+</head>
+
+<body>
+
+
+<div id='map' class='map'>     </div>
+<nav id="menu"></nav>
+
+<div class='map-overlay-3'><div id="pd" class='static-content'><h2><b>Explorer les bassins versants</b></h2>
+<p>Le bassin Seine-Normandie se compose du fleuve de la Seine, de ses 
+affluents (l’Yonne, la Marne, l’Oise), et de petits fleuves de la côte 
+normande (la Vire, la Sélune, l’Arques, la Bresle, …). Il compte 55&nbsp;000 
+km de rivières et s’étend sur 95&nbsp;000 km², soit 18 % du territoire 
+français.</p></div> 
+</div>
+
+
+
+<div class='map-overlay-2 top'>
+    <div class='map-overlay-inner'>
+        <fieldset>
+            <label class="categoryLabel">Les bassins versants de la Seine</label>
+            
+            <div id="bouton" class="button">
+
+
+
+<B></b>
+
+
+        <div class="input-color">
+            <input type="text" value="Côtiers Normands" />
+            <div class="color-box" style="background-color: #94a624;"></div>
+            <!-- Replace "#FF850A" to change the color -->
+        </div>
+
+                <div class="input-color">
+            <input type="text" value="Marne" />
+            <div class="color-box" style="background-color: #f19a99;"></div>
+            <!-- Replace "navy" to change the color -->
+        </div>
+
+
+        <div class="input-color">
+            <input type="text" value="Oise" />
+            <div class="color-box" style="background-color: #e0b523;"></div>
+            <!-- Replace "#FF850A" to change the color -->
+        </div>
+   
+          <div class="input-color">
+            <input type="text" value="Seine Amont" />
+            <div class="color-box" style="background-color: #6e96a9;"></div>
+            <!-- Replace "navy" to change the color -->
+        </div>
+
+ 
+        <div class="input-color">
+            <input type="text" value="Seine Aval" />
+            <div class="color-box" style="background-color: #e28f41;"></div>
+            <!-- Replace "navy" to change the color -->
+        </div>
+  
+
+ </div><BR>
+            <label class="categoryLabel">Villes</label>  
+            <div id="bouton" class="button">
+            <b></b>
+
+
+<div class="line-container">
+<div class="badge" style="height: 20px; width: 20px; background-color : white"> </div>
+<div>Ville secondaire </div>
+</div>
+
+<div class="line-container">
+<div class="badge" style="height: 30px; width: 30px; background-color : white"> </div>
+<div>Ville principale </div>
+</div>
+
+
+<div class="line-container">
+<div class="badge" style="height: 50px; width: 50px; background-color : white"> </div>
+<div>Siège</div>
+</div>
+
+
+            
+<div><style type="text/css">p { margin-bottom: 0.25cm; line-height: 115%; }a:link { }</style><b><u><br></u></b></div><div><b><u>Source</u> : Agence de l'eau Seine-Normandie</b></div><div><span style="color: rgb(0, 0, 0);"><a href="http://carmen.developpement-durable.gouv.fr/18/SDAGE2016_Carte_etats_objectifs.map#" target="_blank">SDAGE 2016-2021</a><b><br></b></span></div><div><br></div>
+
+<h4><font color="#002f89"></h6><font color="black"> <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Logo_agence_de_l%27eau_Seine-Normandie.png"  style="width:60%"><h6></h4><p></p>
+
+<script src="region.js"></script>
+<script src="cluster.js"></script>
+<script src="main.js"></script>
+</body>
+
+</html>
