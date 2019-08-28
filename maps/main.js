@@ -5,7 +5,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidmluY2VudGZhdWNoZXIiLCJhIjoiY2p3cDFtMTJ6MXR5c
 // Configuration de la carte
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/vincentfaucher/cjxepapdn0jzs1clbv5duqfj8',
+    style: 'mapbox://styles/vincentfaucher/cjzv5qotx04p31dmtsmcr7g9w',
     // style: 'mapbox://styles/mapbox/light-v10', // fond de carte
     center: [2.0715, 48.9825 ], // lat/long
     zoom: 6.6, // zoom
@@ -25,19 +25,11 @@ map.on('load', function () {
 function addSources () { 
 
 
-
-
 // Chefs lieux
 
-map.addSource('chefs_lieux-2p4yy3', {
+map.addSource('chefs_lieux-2jqzpo', {
 type: 'vector',
-url: 'mapbox://vincentfaucher.92k0j534'});
-
-// map.addSource("data", {
-// type: "geojson",
-// 'generateId': true,
-// data: window.chefs_lieux,
-// });
+url: 'mapbox://vincentfaucher.c3nube0e'});
 
 
 // // Départements
@@ -71,11 +63,30 @@ map.addSource('sous_bassins-btjz5s', {
 type: 'vector',
 url: 'mapbox://vincentfaucher.0fczrghb'});
 
+
+// // Cours d'eau
+
+map.addSource('cours_eau-2rz2bt', {
+type: 'vector',
+url: 'mapbox://vincentfaucher.2wna4l35'});
+
 map.addSource("data", {
 type: "geojson",
 'generateId': true,
 data: window.sous_bassins
 });
+
+// BV Seine Normandie
+
+map.addSource('bv_seine_normandie-4nhmpx', {
+type: 'vector',
+url: 'mapbox://vincentfaucher.5iog6p1s'});
+
+// Surfaces hydrographiques
+map.addSource('surface_hydrographiques', {
+type: 'vector',
+url: 'mapbox://vincentfaucher.1hvm1v8x'});
+
 
 }
 
@@ -150,7 +161,7 @@ break;
 
 // Régions labels
 
-     map.addLayer({
+    map.addLayer({
     
         "id": "Régions labels",
         "type": "symbol",
@@ -170,6 +181,71 @@ break;
 });
 
 
+// Sous-secteurs fill
+    map.addLayer({
+            "id": "sous-secteurs fill",
+            "type": "fill",
+            "source": "sous_bassins-btjz5s",
+            "source-layer": "sous_bassins-btjz5s",
+            "layout": {},
+            "paint": {
+                "fill-color": [
+                    "match",
+                    ["get", "Nom"],
+                    ["Côtiers Normands"],
+                    "#94a624",
+                    ["Marne"],
+                    "#f19a99",
+                    ["Oise"],
+                    "#e0b523",
+                    ["Seine Amont"],
+                    "#6e96a9",
+                    ["Seine Aval"],
+                    "#e28f41",
+                    "hsl(0, 69%, 57%)"
+                ],
+                "fill-opacity": 0.72
+            }
+        });
+
+// Sous-secteurs stroke
+    map.addLayer({
+            "id": "sous-secteurs stroke",
+            "type": "line",
+            "source": "sous_bassins-btjz5s",
+            "source-layer": "sous_bassins-btjz5s",
+            "layout": {},
+            "paint": {"line-color": "hsl(0, 0%, 100%)", "line-width": 0.5}
+        });
+
+
+// Bassins-versants stroke
+    map.addLayer({
+            "id": "bassins-versants stroke",
+            "type": "line",
+            "source": "bv_seine_normandie-4nhmpx",
+            "source-layer": "bv_seine_normandie-4nhmpx",
+            "layout": {},
+            "paint": {
+                "line-color": "hsla(0, 0%, 0%, 0.32)",
+                "line-opacity": 0.64
+            }
+        });
+
+
+// Surface hydrographique stroke
+    map.addLayer({
+            "id": "surface-hydrographiques stroke",
+            "type": "line",
+            "source": "surface_hydrographiques",
+            "source-layer": "surface_hydrographiques",
+            "layout": {},
+            "paint": {
+                "line-width": 1,
+                "line-color": "hsl(0, 1%, 99%)",
+                "line-blur": 0
+            }
+        });
 // // Sous secteurs
 
     // The feature-state dependent fill-opacity expression will render the hover effect
@@ -208,32 +284,33 @@ break;
             "line-width": 0.7
         }
     });
-// :
+
+// : Chefs lieux
 
 map.addLayer({
 
             "id": "chefs_lieux",
             "type": "symbol",
-            "source": "chefs_lieux-2p4yy3",
-            "source-layer": "chefs_lieux-2p4yy3",
+            "source": "chefs_lieux-2jqzpo",
+            "source-layer": "chefs_lieux-2jqzpo",
             "layout": {
                 "icon-image": "Map-marker-02", 
                 "icon-size":  ['match', ['get', 'NATURE'],
-                    'Siège', 0.25,  
-                    'Ville principale', 0.15, 
-                    'Ville secondaire', 0.08, 
+                    'Siège administratif', 0.18,  
+                    'Direction territoriale', 0.14, 
+                    'Ville principale', 0.10, 
                 0.2],
 
                 "text-field": ["to-string", ["get", "NOM_CHF"]],
                 "text-size": [
                     "match",
                     ["get", "NATURE"],
-                    ["Siège"],
+                    ["Siège administratif"],
                     13,
+                    ["Direction territoriale"],
+                    12,
                     ["Ville principale"],
                     11,
-                    ["Villes secondaires"],
-                    10,
                     13
                 ],
                 "text-offset": [0, 2.7],
@@ -244,19 +321,32 @@ map.addLayer({
                 "text-halo-width": 1,
                 "text-halo-blur": 1
             }
-            })
+            });
 
-// map.addLayer({
 
-//             "id": "chefs_lieux",
-//             "type": "circle",
-//             "source": "chefs_lieux-2p4yy3",
-//             "source-layer": "chefs_lieux-2p4yy3",
-//             "layout": {},
-//             "paint": {"circle-color": "hsl(0, 78%, 56%)", "circle-radius": 2}
-
-// })
-
+// Cours d'eau
+    map.addLayer({
+ 
+            "id": "Cours d'eau",
+            "type": "symbol",
+            "source": "cours_eau-2rz2bt",
+            "source-layer": "cours_eau-2rz2bt",
+            "layout": {
+                "text-field": ["to-string", ["get", "TOPONYME"]],
+                "text-font": [
+                    "Montserrat Medium Italic",
+                    "Arial Unicode MS Regular"
+                ],
+                "text-size": 12,
+                "symbol-placement": "line"
+            },
+            "paint": {
+                "text-halo-width": 20,
+                "text-halo-blur": 5,
+                "text-color": "hsl(207, 100%, 18%)",
+                "text-halo-color": "hsla(0, 0%, 0%, 0)"
+            }
+        });
 
  // When the user moves their mouse over the state-fill layer, we'll update the
     // feature state for the feature under the mouse.
@@ -297,8 +387,30 @@ map.addLayer({
  
     });
 
+   
+//Interactivité HOVER
+var popup = new mapboxgl.Popup({
+closeButton: false,
+closeOnClick: false });
+map.on('mousemove', function(e) {
 
+var features = map.queryRenderedFeatures(e.point, { layers: ['chefs_lieux'] });
+// Change the cursor style as a UI indicator.
+map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+if (!features.length) {
+popup.remove();
+return; }
+var feature = features[0];
+popup.setLngLat(feature.geometry.coordinates)
+.setHTML('<h3><b><div style="text-align: center;">' + feature.properties.nom + '</b></h3>'
+    + '<br>'+ feature.properties.text)
+.addTo(map);
+});
  
+
+//  const adresse = map.queryRenderedFeatures('adresse');
+// if (!(feature.properties.adresse ==="")) 
+// return;
 //Interactivité CLICK
 
 //Pop up chefs lieux
@@ -310,16 +422,11 @@ return;
 var feature = features[0];
 var popup = new mapboxgl.Popup({ offset: [0, -15] })
 .setLngLat(feature.geometry.coordinates)
-// .setHTML('<h4> <font color="#002f89">'  + feature.properties.nom 
-// +'<img src="url-address/' + feature.properties['url'] +'">' 
-//     + '</h6><font color="black"> <img src="http://www.eau-seine-normandie.fr/sites/public_file/logo.png"  style="width:30%"> <h6>'
-// + feature.properties.url_ + '</h4><p>'
 
-// +"" + feature.properties.text + '</h4><p>'
-// +'</p>' )
-
-.setHTML('<b>'+ feature.properties.text + '</b>' 
-    + feature.properties.text + '<p><img src="'+feature.properties.url+'"/></p>')
+.setHTML('<h4><b><font size="4"> <div style="text-align: center;">' + feature.properties.NOM_CHF + ' ' + feature.properties.INSEE_COM +'</h4></b></font>'
+       + '<br>'+ feature.properties.url_
+       + '<font size="1"><i><a href = "'+feature.properties.source +'" target="blank"> Source : ' + feature.properties.source +'</a</i></font>'
+ )
 
 
 .addTo(map);
@@ -346,16 +453,9 @@ map.flyTo({center: e.features[0].geometry.coordinates});
 });
 
 
-
-
-
-
 }
 
  
-
-
-
 
 //Ajout échelle cartographique
        
